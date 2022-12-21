@@ -62,7 +62,7 @@ https://cloud.google.com/storage/docs/caching?hl=ja
 
 ## Cloud CDN のキャッシュ設定
 
-[GCS 単独で Web サイトをホスティングできる](https://cloud.google.com/storage/docs/hosting-static-website)とはいえ、実際には、GCS で静的コンテンツを配信する際には、HTTP ではなく HTTPS で配信するために、HTTP(S) Load Balancing と組み合わせることが多いと思います。
+[GCS 単独で静的 Web サイトをホスティングできる](https://cloud.google.com/storage/docs/hosting-static-website)とはいえ、実際には、HTTP ではなく HTTPS で公開するために、HTTP(S) Load Balancing と組み合わせることが多いと思います。
 
 その場合、HTTP(S) Load Balancing の設定で Cloud CDN との連携機能を有効にするだけで、CDN 経由で低レイテンシでのコンテンツ配信も行うことができます。
 
@@ -151,7 +151,7 @@ Origin の `Cache-Control` ヘッダに `stale-while-revalidate` ディレクテ
 
 ## じゃあどう設定すれば良いの？
 
-ここまでの話を踏まえて、では GCS + HTTP(S) LB + Cloud CDN で静的コンテンツを配信する際に、各設定値はどのようにすれば良いか考えてみます。
+ここまでの話を踏まえて、では GCS + HTTP(S) LB + Cloud CDN で静的 Web サイトをホスティングする際に、各設定値はどのようにすれば良いか考えてみます。
 
 まず以下の 2 点はある程度決め打ちできます。
 
@@ -171,7 +171,7 @@ Origin の `Cache-Control` ヘッダに `stale-while-revalidate` ディレクテ
 ## 各タイミングで参照されるキャッシュの例
 
 では改めて、ここまでご説明した内容を踏まえて、具体例を挙げて Client & CDN でのキャッシュの残り方を説明します。
-GCS + HTTP(S) LB + Cloud CDN で静的コンテンツを配信する際を想定しています。
+繰り返しになりますが、GCS + HTTP(S) LB + Cloud CDN で静的 Web サイトをホストすることを想定しています。
 （ただし具体的な秒数はあくまで例です）。
 
 **GCS の設定**
@@ -204,5 +204,5 @@ GCS + HTTP(S) LB + Cloud CDN で静的コンテンツを配信する際を想定
 最後までお読みいただきありがとうございます。
 Cloud CDN を中心に、いろいろな設定があってややこしかったと思いますが、なんとなくイメージはつかめたでしょうか？
 
-[SSG（静的サイトジェネレータ）](https://en.wikipedia.org/wiki/Static_site_generator )を使って事前レンダリングした Web サイトなど、このように GCS を使ってサクッと配信できると便利なケースは増えてきていると思います。
+[SSG（静的サイトジェネレータ）](https://en.wikipedia.org/wiki/Static_site_generator )を使って事前レンダリングした Web サイトなど、このように GCS を使ってサクッとホスティングできると便利なケースは増えてきていると思います。
 ぜひ本記事も参考にして、快適な GCS ライフを送っていただけると幸いです！
