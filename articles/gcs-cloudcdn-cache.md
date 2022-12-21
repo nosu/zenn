@@ -1,22 +1,24 @@
 ---
-title: "Cloud Storage + ロードバランサ + Cloud CDN で静的コンテンツを配信する際のキャッシュ設定をおさらい"
+title: "Cloud Storage + LB + Cloud CDN で静的 Web サイトをホスティングする際のキャッシュ設定をおさらい"
 emoji: "☁️"
-type: "tech" # tech: 技術記事 / idea: アイデア
+type: "tech"
 topics: [gcp, cloudstorage, cloudcdn, cloudloadbalancer]
+publication_name: google_cloud_jp
 published: true
 ---
 
 本記事は [Google Cloud Japan Advent Calendar 2022](https://zenn.dev/google_cloud_jp/articles/12bd83cd5b3370) の [通常版](https://zenn.dev/google_cloud_jp/articles/12bd83cd5b3370#%E9%80%9A%E5%B8%B8%E7%89%88) の 19 日目の記事です。
 
-Google Cloud Storage (GCS) では、Web フロントエンドなどの静的コンテンツを、バケットに保存するだけで簡単に公開することができて便利です。
-さらに、Google Cloud の HTTP(S) Load Balancing と組み合わせることで、HTTPS に対応させたり、Cloud CDN と組み合わせることで CDN にキャッシュすることもできるので、アクセス数の多い商用サービスなどでも充分に対応できます。
+Google Cloud Storage (GCS) では、[静的コンテンツからなる Web サイトを、バケットに保存するだけで簡単に公開](https://cloud.google.com/storage/docs/hosting-static-website)することができて便利です。
 
-一方で、このやり方を採用してシステム設計する際に、ややこしいのがキャッシュの設定です。
+さらに、Google Cloud の HTTP(S) Load Balancing と組み合わせることで、HTTPS でのホスティングに対応させたり、Cloud CDN と組み合わせることで CDN にキャッシュすることもできるので、アクセス数の多い商用サービスなどでも充分に対応できます。
+
+一方で、このやり方を採用して Web サイトをホスティングする際に、ややこしいのがキャッシュの設定です。
 特に上記のように LB や CDN と組み合わせた際には、以下のようにキャッシュに関連する設定が複数あるため、挙動が少しわかりにくいです。
 
 - GCS の組み込みキャッシュ設定
 - Cloud CDN の TTL 設定
-- Cloud CDN の Serve while stale (Stale-while-revalidate) 設定
+- Cloud CDN の Serve stale content (Stale-while-revalidate) 設定
 
 本記事では、それぞれの設定がどのような挙動になるのか説明していきます。
 
@@ -48,9 +50,9 @@ https://cloud.google.com/storage/docs/caching?hl=ja
 
 - public: オブジェクトを任意のキャッシュに保存できます。
 - private: オブジェクトは、リクエスト元のローカル キャッシュに保存されます。
-- no-cache: オブジェクトは、キャッシュに保存されますが、Cloud Storage によって最初に検証されない限り、将来のリクエストには使用されません。
+- no-cache: キャッシュに保存されますが、Cloud Storage に対してキャッシュの有効性の確認がとれた場合のみ、使われます。
 - no-store: オブジェクトはキャッシュに保存されません。
-- max-age=TIME_IN_SECONDS: キャッシュに保存されたオブジェクトが古くなったとみなされるまでの時間。max-age には任意の長さの時間を設定できます。特別な状況を除いて、古くなったオブジェクトは、キャッシュから提供されません。
+- max-age=秒数: キャッシュに保存されたオブジェクトが古くなったとみなされるまでの時間。max-age には任意の秒数を設定できます。特別な状況を除いて、古くなったオブジェクトは、キャッシュから提供されません。
 
 
 重要な点としては、公開バケットで **明示的に指定しなかった場合には `Cache-Control: public, max-age=3600` がデフォルト値として勝手に設定される** ようになっているため、GCS のオブジェクトが上書き更新された場合でも、1 時間（＝3,600 秒）の間は、組み込みキャッシュから古いオブジェクトが返ることになります。
@@ -60,7 +62,8 @@ https://cloud.google.com/storage/docs/caching?hl=ja
 
 ## Cloud CDN のキャッシュ設定
 
-GCS 単独で HTTP の静的サイトを公開できるとはいえ、実際には、GCS で静的コンテンツを配信する際には、HTTP ではなく HTTPS で配信するために、HTTP(S) Load Balancing と組み合わせることが多いと思います。
+[GCS 単独で Web サイトをホスティングできる](https://cloud.google.com/storage/docs/hosting-static-website)とはいえ、実際には、GCS で静的コンテンツを配信する際には、HTTP ではなく HTTPS で配信するために、HTTP(S) Load Balancing と組み合わせることが多いと思います。
+
 その場合、HTTP(S) Load Balancing の設定で Cloud CDN との連携機能を有効にするだけで、CDN 経由で低レイテンシでのコンテンツ配信も行うことができます。
 
 「おおそれは便利だ！」ということで、GCS - HTTP(S) LB - Cloud CDN という構成にする場合、以下のような設定がキャッシュの挙動に関わってくることになります。
@@ -126,19 +129,21 @@ https://cloud.google.com/cdn/docs/using-ttl-overrides?hl=ja#max-ttl
 
 TTL の設定でもお腹いっぱいになりそうですが、Cloud CDN のキャッシュに関してもう一つ重要な設定として、[古いコンテンツを配信する（Serve stale content = いわゆる `Stale-while-revalidate`）機能](https://cloud.google.com/cdn/docs/serving-stale-content?hl=ja) の設定があります。
 
-この機能を有効にした場合、CDN 側でのキャッシュ期限が切れていたとしても、指定した秒数だけは猶予期間として期限切れのキャッシュを CDN から返します。
-Cloud CDN 側では、期限切れコンテンツへのリクエストがあってはじめて、Origin 側に非同期で最新のコンテンツを確認（Revalidate）しに行きます（逆に言うとリクエストがないと、`Serve stale content` の秒数が経過するまでずっと古いキャッシュが返ります）。
+この機能を有効にした場合、CDN 側でのキャッシュ期限が切れていたとしても、指定した秒数の間は猶予期間として期限切れのキャッシュを CDN から返すことを許容できます。
 
-この機能がうれしいのは、以下のような理由です。
+この機能がうれしいのは、以下のようなメリットがあるからです。
 
-1. ユーザにエラーを表示する頻度を下げられる（Origin 再検証（Revalidate）のタイミングでたまたま Origin がエラーを返しても、期限切れコンテンツを返してお茶を濁すことができる）
+1. ユーザにエラーを表示する頻度を下げられる（CDN 側キャッシュの期限が切れて Origin に再検証（Revalidate）しに行くタイミングでたまたま Origin がエラーを返しても、CDN からは期限切れキャッシュを返してお茶を濁すことができる）
 2. CDN でキャッシュを再生成する際のレイテンシが大きくなるのを防ぐことができる
 
-特に 1. については、クラウドサービスの常として、GCS も低確率でエラー応答が返ることは想定する必要があるため、それをカバーできるのは便利だと思います。
+特に 1. については、クラウドサービスの常として、GCS も低確率でエラー応答が返ることは想定する必要があるため、（多少古いとしても）クライアントにエラーではなく正常にコンテンツを返せるのは便利だと思います。
 
-またここでも重要な点としては、Cloud CDN で **明示的に指定しなかった場合には 86,400 秒 (1 日) がデフォルト値として勝手に設定される** ようになっているため、その間は CDN 側のキャッシュ期限が切れていても、期限切れのキャッシュがクライアントに返る可能性があります。
+一方で、いくつか注意点もあります。
 
-つまりデフォルト設定の場合、GCS 上でオブジェクトを更新した際に、CDN のキャッシュを 0 秒に指定していたとしても、最大 1 日後までは古いコンテンツがクライアントに返る可能性があります。
+- Cloud CDN 側では、**期限切れコンテンツへのリクエストがあってはじめて、Origin 側に非同期で最新のコンテンツを確認（Revalidate）しに行って、必要な場合は新しいキャッシュを生成** します。逆に言うと 例えば `Serve stale content` の期間が始まってからずっとコンテンツへのリクエストがなく、期間の終わり際にはじめてリクエストが来た場合、そのタイミングでも一旦古いキャッシュが返る可能性があります（ごくたまーにしかリクエストのないコンテンツとか）
+- Cloud CDN では、**明示的に指定しなかった場合には Serve stale content = 86,400 秒 (1 日) がデフォルト値として勝手に設定される** ようになっています
+
+つまりデフォルト設定の場合、GCS 上でオブジェクトを更新した際に、CDN のキャッシュを 0 秒に指定していたとしても、最悪ケースではキャッシュの期限切れから最大 1 日後までは古いコンテンツがクライアントに返る可能性があります。
 
 というわけで、オブジェクトを更新した際に、一定期間内に確実にクライアント側に反映したい場合には、この `Serve stale content` の秒数も明示的に指定するようにしましょう。
 Origin の `Cache-Control` ヘッダに `stale-while-revalidate` ディレクティブか、または Cloud CDN の `cdnPolicy.serveWhileStale` で明示的に指定を行うことができます。
@@ -190,7 +195,8 @@ GCS + HTTP(S) LB + Cloud CDN で静的コンテンツを配信する際を想定
 
 ![](/images/gcs-cloudcdn-cache/cache-diagram.png)
 
-図を見ると、初回のリクエストで生成された CDN 側のキャッシュは、最終的に `Default TTL` + `Serve stale content` の合計秒数が経過すると、確実に更新されるのがわかります。
+図を見ると、初回のリクエストで生成された **CDN 側の** キャッシュは、最終的に `Default TTL` + `Serve stale content` の合計秒数が経過すると、確実に更新されるのがわかります
+（ただし、例えば CDN 側キャッシュが更新される直前にクライアント側キャッシュが生成された場合には、クライアント側で `Client TTL` が切れるまではローカルの古いキャッシュから返ってしまうのでご注意ください）。
 
 
 ## まとめ
@@ -198,5 +204,5 @@ GCS + HTTP(S) LB + Cloud CDN で静的コンテンツを配信する際を想定
 最後までお読みいただきありがとうございます。
 Cloud CDN を中心に、いろいろな設定があってややこしかったと思いますが、なんとなくイメージはつかめたでしょうか？
 
-SSG（静的サイトジェネレータ）を使って事前レンダリングした Web サイトなど、このように GCS を使ってサクッと配信できると便利なケースは増えてきていると思います。
+[SSG（静的サイトジェネレータ）](https://en.wikipedia.org/wiki/Static_site_generator )を使って事前レンダリングした Web サイトなど、このように GCS を使ってサクッと配信できると便利なケースは増えてきていると思います。
 ぜひ本記事も参考にして、快適な GCS ライフを送っていただけると幸いです！
