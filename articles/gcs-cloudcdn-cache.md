@@ -17,7 +17,7 @@ Google Cloud Storage (GCS) では、[静的コンテンツからなる Web サ�
 
 - GCS の組み込みキャッシュ設定
 - Cloud CDN の TTL 設定
-- Cloud CDN の Serve stale content (Stale-while-revalidate) 設定
+- Cloud CDN の Serve stale content (`Stale-while-revalidate`) 設定
 
 本記事では、それぞれの設定の結果としてどのような挙動になるのか説明していきます。
 
