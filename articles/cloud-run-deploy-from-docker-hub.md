@@ -21,13 +21,13 @@ Artifact Registry にリモートリポジトリを作成すると、そのリ�
 
 ![リモートリポジトリの作成](/images/cloud-run-deploy-from-docker-hub/create-remote-repo.png)
 
-リポジトリの作成が終わったあと、詳細画面を開くと以下のように表示されます。
+現状では、リモートリポジトリの接続先としては Docker Hub のみに対応しているので、自動的に `Docker Hub` が選択されていますね。リポジトリの作成が終わったあと、詳細画面を開くと以下のように表示されます。
 
 ![リモートリポジトリの詳細](/images/cloud-run-deploy-from-docker-hub/remote-repo-details.png)
 
-なお、Cloud Console の画面ではなく Terraform を利用する場合には、Google Cloud 用 Provider の [google_artifact_registry_repository](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/artifact_registry_repository) を使って、`mode = "REMOTE_REPOSITORY" を指定することで同様にリモートリポジトリを作成できます。
+なお、Cloud Console の画面ではなく Terraform を利用する場合には、Google Cloud 用 Provider の [google_artifact_registry_repository](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/artifact_registry_repository) を使って、`mode = "REMOTE_REPOSITORY"` を指定することで同様にリモートリポジトリを作成できます。
 
-```terraform
+```
 resource "google_artifact_registry_repository" "repo" {
   location      = "asia-northeast1"
   repository_id = "docker"
@@ -53,16 +53,13 @@ resource "google_artifact_registry_repository" "repo" {
 
 `<REGION_NAME>-docker.pkg.dev/<PROJECT_ID>/<REPOSITORY_NAME>/<DOCKER_HUB_IMAGE_NAME>(:<TAG>)`
 
-`<DOCKER_HUB_IMAGE_NAME>` というのが、今回で言うと `dockersamples/static-site` なので、例えば以下のようになります。
-
+`<DOCKER_HUB_IMAGE_NAME>` というのが、今回で言うと `hello-world` なので、例えば以下のようになります。
 `asia-northeast1-docker.pkg.dev/nosu-sandbox/docker/hello-world`
 
-タグを明示する場合にはこうなります。
-
+あるいは、タグを明示的に指定する場合にはこうなります。
 `asia-northeast1-docker.pkg.dev/nosu-sandbox/docker/hello-world:latest`
 
 それでは、実際に Cloud Shell を開き、Docker Hub のイメージを Pull できるか見てみましょう。
-
 最初に認証設定を行います。
 
 ```bash
@@ -146,4 +143,4 @@ resource "google_artifact_registry_repository_iam_member" "repo-iam" {
 
 というわけで、リモートリポジトリを利用すると、Docker Hub から Cloud Run へのデプロイがかなりやりやすくなったので、Docker Hub に公開されているイメージや、あるいは自分で開発したアプリケーションでも、OSS として Docker Hub に公開しても良いものであれば、リモートリポジトリ経由でのデプロイを検討してみると良さそうです。
 
-なお、リモートリポジトリに加えて、仮想リポジトリ（Virtual Repository）という複数のリポジトリを一つのエンドポイントに集約するような機能も追加されています。これについても時間があるとき書きます。
+なお、リモートリポジトリに加えて、[仮想リポジトリ（Virtual Repository）](https://cloud.google.com/artifact-registry/docs/repositories/virtual-repo?hl=ja) という複数のリポジトリを一つのエンドポイントに集約するような機能も追加されています。これについても時間があるとき書きます。
