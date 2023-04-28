@@ -43,7 +43,7 @@ resource "google_artifact_registry_repository" "repo" {
 ```
 
 
-## リモートリポジトリの利用
+## リモートリポジトリを使う
 
 では早速、作成したリモートリポジトリを経由して Docker Hub のコンテナイメージを Pull してみましょう。
 
@@ -78,7 +78,7 @@ docker pull asia-northeast1-docker.pkg.dev/${PROJECT_ID}/docker/hello-world
 うまくいきましたね。
 
 
-### Cloud Run へデプロイする
+### リモートリポジトリから Cloud Run へデプロイする
 
 では、いよいよ Docker Hub のイメージを Cloud Run にデプロイしてみましょう。
 
@@ -153,7 +153,7 @@ gcloud run deploy image-from-other-project \
   --port=80 --allow-unauthenticated --region=asia-northeast1
 ```
 
-### 感想
+## 感想
 
 というわけで、リモートリポジトリを利用すると、Docker Hub から Cloud Run へのデプロイがかなりやりやすくなりました。Docker Hub に公開されているイメージや、あるいは自分で開発したアプリケーションでもオープンソース等で Docker Hub に公開するものであれば、リモートリポジトリ経由でのデプロイも検討してみると良さそうです。
 
