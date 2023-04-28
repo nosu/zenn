@@ -45,8 +45,7 @@ resource "google_artifact_registry_repository" "repo" {
 
 ## リモートリポジトリを使う
 
-では早速、作成したリモートリポジトリを経由して Docker Hub のコンテナイメージを Pull してみましょう。
-ここでは、Docker Hub で公開されている [hello-world](https://hub.docker.com/_/hello-world) というサンプルのコンテナイメージを Pull してみます。
+では早速、作成したリモートリポジトリを経由して Docker Hub のコンテナイメージを Pull してみましょう。ここでは、Docker Hub で公開されている [hello-world](https://hub.docker.com/_/hello-world) というサンプルのコンテナイメージを Pull してみます。
 
 通常、Docker Hub から直接イメージを Pull する場合は、`docker pull hello-world` といったように、イメージ名のみで指定していると思います。一方、Artifact Registry のリモートリポジトリ経由で Pull する場合には、Artifact Registry の URL 形式にしたがって、Pull 対象を以下のように指定します。
 
@@ -79,8 +78,7 @@ docker pull asia-northeast1-docker.pkg.dev/${PROJECT_ID}/docker/hello-world
 
 ### リモートリポジトリから Cloud Run へデプロイする
 
-では、いよいよ Docker Hub のイメージを Cloud Run にデプロイしてみましょう。
-ここでは、Docker Hub で公開されている [dockersamples/static-site](https://hub.docker.com/r/dockersamples/static-site) というサンプルの Web アプリをデプロイしてみます。
+では、いよいよ Docker Hub のイメージを Cloud Run にデプロイしてみましょう。ここでは、Docker Hub で公開されている [dockersamples/static-site](https://hub.docker.com/r/dockersamples/static-site) というサンプルの Web アプリをデプロイしてみます。
 
 まず、Cloud Console から Cloud Run のサービスデプロイ画面を開いてみると、先ほど Pull した `hello-world` のみが表示されているのがわかります。少なくとも現状では、一度 Pull してキャッシュされたイメージしか指定できないようです。
 
