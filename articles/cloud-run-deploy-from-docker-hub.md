@@ -3,7 +3,7 @@ title: "Artifact Registryのリモートリポジトリを使ってDocker Hubか
 emoji: "📦"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [artifactregistry, cloudrun, gcp, docker, dockerhub]
-published: false
+published: true
 ---
 
 Cloud Run にデプロイするコンテナイメージは、必ず Google Cloud の Artifact Registry や Container Registry に Push する必要があります。そのためこれまでは、Docker Hub で公開されている既存のコンテナイメージであっても、デプロイ前にローカルの作業環境などを経由してそれらのプライベートリポジトリにコンテナイメージをアップロードし直す必要があり、それがちょっと面倒なポイントでした（AWS だと、Amazon ECR Public がそのあたりカバーしてくれていると思います）。
