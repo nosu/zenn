@@ -6,6 +6,14 @@ topics: [artifactregistry, cloudrun, gcp, docker, dockerhub]
 published: true
 ---
 
+## TL;DR
+
+- Artifact Registry に Docker のリモートリポジトリというプレビュー機能が追加されました
+- リモートリポジトリを作ると、それ経由で Docker Hub のイメージを Cloud Run にデプロイでき、キャッシュもしてくれます
+- リモートリポジトリのコンテナイメージはこのように指定します：`<REGION_NAME>-docker.pkg.dev/<PROJECT_ID>/<REPOSITORY_NAME>/<DOCKER_HUB_IMAGE_NAME>(:<TAG>)`
+
+## はじめに
+
 Cloud Run にデプロイするコンテナイメージは、必ず Google Cloud の Artifact Registry や Container Registry に Push する必要があります。そのためこれまでは、Docker Hub で公開されている既存のコンテナイメージであっても、デプロイ前にローカルの作業環境などを経由してそれらのプライベートリポジトリにコンテナイメージをアップロードし直す必要があり、それがちょっと面倒なポイントでした（AWS だと、Amazon ECR Public がそのあたりカバーしてくれていると思います）。
 
 しかし、Artifact Registry の [2023 年 2 月のアップデート](https://cloud.google.com/artifact-registry/docs/release-notes#February_14_2023) で、[リモートリポジトリ](https://cloud.google.com/artifact-registry/docs/repositories/remote-repo) という機能のプレビュー提供がはじまり、この点が改善されました。
