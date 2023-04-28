@@ -10,7 +10,7 @@ Cloud Run にデプロイするコンテナイメージは、必ず Google Cloud
 
 しかし、Artifact Registry の [2023 年 2 月のアップデート](https://cloud.google.com/artifact-registry/docs/release-notes#February_14_2023) で、[リモートリポジトリ](https://cloud.google.com/artifact-registry/docs/repositories/remote-repo) という機能のプレビュー提供がはじまり、この点が改善されました。
 
-Artifact Registry にリモートリポジトリを作成すると、そのリモートリポジトリを経由して、Docker Hub 上の公開イメージを Pull することが可能になります。リモートリポジトリがプロキシとして働いてくれるイメージですね（`Docker Client <-> Artifact Registry リモートリポジトリ <-> Docker Hub`）。
+Artifact Registry にリモートリポジトリを作成すると、そのリモートリポジトリを経由して、Docker Hub 上の公開イメージを Pull することが可能になります。リモートリポジトリがプロキシとして働いてくれるイメージですね（`Docker Client/Cloud Run <-> Artifact Registry リモートリポジトリ <-> Docker Hub`）。
 
 使い方はシンプルですが、一応順を追って見てみましょう。
 
