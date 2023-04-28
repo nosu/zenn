@@ -151,6 +151,6 @@ gcloud run deploy image-from-other-project \
 
 ## 感想
 
-というわけで、リモートリポジトリを利用すると、Docker Hub から Cloud Run へのデプロイがかなりやりやすくなりました。Docker Hub に公開されているイメージや、あるいは自分で開発したアプリケーションでもオープンソース等で Docker Hub に公開するものであれば、リモートリポジトリ経由でのデプロイも検討してみると良さそうです。
+というわけで、リモートリポジトリの登場で、Docker Hub から Cloud Run へのデプロイがやりやすくなりました。Docker Hub に公開されているイメージや、あるいは自分で開発したアプリケーションでもオープンソース等で Docker Hub に公開するものであれば、リモートリポジトリ経由でのデプロイも検討してみると良さそうです。
 
 なお、リモートリポジトリに加えて、[仮想リポジトリ（Virtual Repository）](https://cloud.google.com/artifact-registry/docs/repositories/virtual-repo?hl=ja) という複数のリポジトリを一つのエンドポイントに集約するような機能も追加されています。これについても時間があるとき書こうと思います。
