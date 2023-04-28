@@ -114,9 +114,9 @@ gcloud run deploy image-from-docker-hub \
 
 ここからはおまけです。検証用途などで、Docker Hub 上のコンテナイメージをサクッと Cloud Run にデプロイしたいことは非常によくあると思いますが（？）、そのためだけにプロジェクトごとにリモートリポジトリを作成するのは面倒です。
 
-その場合、どこかの共有プロジェクトにリモートリポジトリを一個作っておいて、（本番環境など細かい権限管理が必要なケースを除いた）雑多な用途で共通利用する、ということもできます。
+その場合、どこかの共有プロジェクトにリモートリポジトリを一個作っておいて、（本番環境など細かい権限管理が必要なケースを除いた）雑多な用途で共通利用する、ということもできます。ただし、その場合は Cloud Run のプロジェクトから Artifact Registry を読み取ることができるように権限付与を行う必要があります。
 
-Cloud Run が Artifact Registry からイメージを Pull する際には、Cloud Run の属するプロジェクトにおける [Cloud Run の Service Agent と呼ばれるサービスアカウント](https://cloud.google.com/iam/docs/service-agents#google-cloud-run-service-agent)（`service-<PROJECT_NUMBER>@serverless-robot-prod.iam.gserviceaccount.com`）の権限が利用されます。この Service Agent がリモートリポジトリにアクセスできるようにするには、以下のようにしてリモートリポジトリが存在しているプロジェクトにおける `Artifact Registry 読み取り（roles/artifactregistry.reader）` 権限を付与します。
+具体的には、Cloud Run が Artifact Registry からイメージを Pull する際には、Cloud Run の属するプロジェクトにおける [Cloud Run の Service Agent と呼ばれるサービスアカウント](https://cloud.google.com/iam/docs/service-agents#google-cloud-run-service-agent)（`service-<PROJECT_NUMBER>@serverless-robot-prod.iam.gserviceaccount.com`）の権限が利用されます。この Service Agent がリモートリポジトリにアクセスできるようにするために、以下のようにしてリモートリポジトリが存在しているプロジェクトにおける `Artifact Registry 読み取り（roles/artifactregistry.reader）` 権限を付与します。
 
 :::message
 もちろん、個別の Service Agent ではなく、`allUsers` に読み取り権限を与えれば、Public に誰でも利用できるリモートリポジトリを作成することもできるが、当然おすすめできません。
