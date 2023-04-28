@@ -116,7 +116,7 @@ gcloud run deploy image-from-docker-hub \
 
 その場合、どこかの共有プロジェクトにリモートリポジトリを一個作っておいて、（本番環境など細かい権限管理が必要なケースを除いた）雑多な用途で共通利用する、ということもできます。
 
-Cloud Run が Artifact Registry からイメージを Pull する際には、Cloud Run の属するプロジェクトにおける Cloud Run の Service Agent と呼ばれるサービスアカウント（`service-<PROJECT_NUMBER>@serverless-robot-prod.iam.gserviceaccount.com`）の権限が利用されます。この Service Agent がリモートリポジトリにアクセスできるようにするには、以下のようにしてリモートリポジトリが存在しているプロジェクトにおける `Artifact Registry 読み取り（roles/artifactregistry.reader）` 権限を付与します。
+Cloud Run が Artifact Registry からイメージを Pull する際には、Cloud Run の属するプロジェクトにおける [Cloud Run の Service Agent と呼ばれるサービスアカウント](https://cloud.google.com/iam/docs/service-agents#google-cloud-run-service-agent)（`service-<PROJECT_NUMBER>@serverless-robot-prod.iam.gserviceaccount.com`）の権限が利用されます。この Service Agent がリモートリポジトリにアクセスできるようにするには、以下のようにしてリモートリポジトリが存在しているプロジェクトにおける `Artifact Registry 読み取り（roles/artifactregistry.reader）` 権限を付与します。
 
 :::message
 もちろん、個別の Service Agent ではなく、`allUsers` に読み取り権限を与えれば、Public に誰でも利用できるリモートリポジトリを作成することもできるが、当然おすすめできません。
@@ -127,9 +127,9 @@ Cloud Run が Artifact Registry からイメージを Pull する際には、Clo
 
 ```
 gcloud artifacts repositories add-iam-policy-binding docker \
-   --project=<PROJECT_ID (of Artifact Registry)> \
+   --project=<PROJECT_ID (where Artifact Registry exists)> \
    --location=asia-northeast1 \
-   --member="serviceAccount:service-<PROJECT_NUMBER (of Cloud Run)>@serverless-robot-prod.iam.gserviceaccount.com" \
+   --member="serviceAccount:service-<PROJECT_NUMBER (where Cloud Run exists)>@serverless-robot-prod.iam.gserviceaccount.com" \
    --role=roles/artifactregistry.reader
 ```
 
@@ -140,7 +140,7 @@ resource "google_artifact_registry_repository_iam_member" "repo-iam" {
   location = "asia-northeast1"
   repository = "docker"
   role   = "roles/artifactregistry.reader"
-  member = "serviceAccount:service-<PROJECT_NUMBER (of Cloud Run)>@serverless-robot-prod.iam.gserviceaccount.com"
+  member = "serviceAccount:service-<PROJECT_NUMBER (where Cloud Run exists)>@serverless-robot-prod.iam.gserviceaccount.com"
 }
 ```
 
